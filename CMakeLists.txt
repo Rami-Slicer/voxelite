@@ -21,17 +21,18 @@ link_libraries(glfw GL X11 pthread Xrandr Xi dl assimp noise z boost_iostreams)
 find_package(Boost REQUIRED)
 link_directories(lib/)
 
-add_executable(voxelite src/main.cpp)
+# add_executable(voxelite src/main.cpp)
+add_library(voxelite STATIC ${voxelite_SRC})
 
 target_include_directories(voxelite PUBLIC include/)
 
-target_link_libraries(voxelite libvoxelite)
+# target_link_libraries(voxelite libvoxelite)
 
-add_custom_command(TARGET voxelite POST_BUILD
-                   COMMAND ${CMAKE_COMMAND} -E rm -rf $<TARGET_FILE_DIR:voxelite>/assets
-                   COMMAND ${CMAKE_COMMAND} -E copy_directory
-                   ${CMAKE_SOURCE_DIR}/assets $<TARGET_FILE_DIR:voxelite>/assets
-)
+# add_custom_command(TARGET voxelite POST_BUILD
+#                    COMMAND ${CMAKE_COMMAND} -E rm -rf $<TARGET_FILE_DIR:voxelite>/assets
+#                    COMMAND ${CMAKE_COMMAND} -E copy_directory
+#                    ${CMAKE_SOURCE_DIR}/assets $<TARGET_FILE_DIR:voxelite>/assets
+# )
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
