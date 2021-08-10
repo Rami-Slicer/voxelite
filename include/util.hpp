@@ -15,3 +15,10 @@ void CheckGLError();
 // #else
 // #	define CHECK_GL_ERROR
 // #endif
+
+void genFramebuffer(unsigned int * buf, int width, int height);
+
+struct WindowInfo {
+    int width;
+    int height;
+};

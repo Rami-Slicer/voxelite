@@ -12,7 +12,8 @@ set(voxelite_SRC
     src/util.cpp
     src/world.cpp
     src/serializer.cpp
-    
+    src/worldgen.cpp
+
     PARENT_SCOPE
 )
 

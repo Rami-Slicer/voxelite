@@ -22,7 +22,7 @@ VoxelChunk::VoxelChunk(int size, VoxelPalette * palette, glm::ivec3 position) {
     for(int x = 0; x < size; x++) {
         for(int y = 0; y < size; y++) {
             for(int z = 0; z < size; z++) {
-                this->data.push_back(0);
+                this->data.push_back("air");
                 this->visible.push_back(true);
             }
         }
@@ -51,7 +51,7 @@ int VoxelChunk::calcIndice(int x, int y, int z) {
     return indice;
 }
 
-void VoxelChunk::setVoxel(int x, int y, int z, int id) {
+void VoxelChunk::setVoxel(int x, int y, int z, std::string id) {
     int indice = calcIndice(x, y, z);
     data[indice] = id;
 
@@ -87,13 +87,13 @@ std::vector<Model> VoxelChunk::getModels() {
 
     std::vector<Model> models;
 
-    int voxels_amount = palette.get_size();
+    std::vector<voxel_pair> iter = *palette.iter();
     
-    for(int i = 1; i < voxels_amount; i++) {
+    for(voxel_pair &pair : iter) {
 
         Model full;
 
-        full = palette.fromID(i).getModel();
+        full = palette.fromID(pair.first).getModel();
         
         models.push_back(full);
     }
@@ -102,7 +102,7 @@ std::vector<Model> VoxelChunk::getModels() {
     
 
     std::cout << "updated chunk" << std::endl;
-    this->model_cache = models;
+    this->model_cache.swap(models);
     
     
     return this->model_cache;
@@ -142,7 +142,7 @@ void VoxelChunk::updateVisible(int x, int y, int z) {
 
     for(int i = 0; i < iAdj.size(); i++) {
 
-        int id = this->data[iAdj[i]]; 
+        std::string id = this->data[iAdj[i]]; 
 
         if(palette.fromID(id).isTransparent()) {
             this->visible[indice] = true;
@@ -163,16 +163,18 @@ RenderData * VoxelChunk::genData() {
 
     RenderData renderData;
     
-    for(int i = 1; i < palette.get_size(); i++) {
+    for(int i = 0; i < palette.get_size(); i++) {
         int count = 0;
         std::vector<glm::mat4> mat_vec;
         // std::vector<glm::vec3> pos_vec;
+        std::string id = palette.iter()->at(i).first;
         
         for(int x = 0; x < this->size; x++) {
             for(int y = 0; y < this->size; y++) {
                 for(int z = 0; z < this->size; z++) {
                     int indice = calcIndice(x, y, z);
-                    if(this->data[indice] == i) {
+
+                    if(this->data[indice] == id) {
                         if(this->visible[indice]) {
                             count++;
                             // int x = x*2+2*this->size*this->chunk_position.x;
@@ -246,7 +248,12 @@ void VoxelChunk::draw_instanced(Shader * shaderptr, RenderData * renderDataptr) 
     for(int i = 0; i < renderData.models.size(); i++) {
         int count = renderData.counts[i];
         Model model = renderData.models[i];
-        std::vector<glm::mat4> transforms = renderData.transforms[i];
+        std::vector<glm::mat4> transforms;
+        // transforms = renderData.transforms[i];
+        transforms.reserve(renderData.transforms.size());
+        transforms.swap(renderData.transforms[i]);
+
+        
         // std::vector<glm::vec3> transforms = renderData.transforms[i];
 
 
@@ -306,7 +313,6 @@ void VoxelChunk::draw_instanced(Shader * shaderptr, RenderData * renderDataptr) 
         //instance positions
         
         glBindBuffer(GL_ARRAY_BUFFER, iPosBuffer);
-
         glBufferData(GL_ARRAY_BUFFER, count * sizeof(glm::mat4), transforms.data(), GL_DYNAMIC_DRAW);
         
         

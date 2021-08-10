@@ -1,13 +1,16 @@
 #include <world.hpp>
 
-using namespace noise;
+
 
 const float scale = 0.1;
 
-World::World(int chunk_size, VoxelPalette * palette) {
+World::World(int chunk_size, VoxelPalette * palette, WindowInfo w_info) {
     this->chunk_size = chunk_size;
     this->palette = palette;
     
+    genFramebuffer(&this->render_buf, w_info.width, w_info.height);
+    genFramebuffer(&this->shadow_buf, 1024, 1024);
+
 }
 
 float distance(glm::vec3 a, glm::vec3 b) {
@@ -31,18 +34,14 @@ void World::generateAt(int cx, int cy, int cz) {
     }
 
     VoxelChunk toAdd = VoxelChunk(this->chunk_size, this->palette, glm::ivec3(cx, cy, cz));
-    
-    module::Perlin perlin;
+
 
     for(int x = 0; x < this->chunk_size; x++) {
         for(int y = 0; y < this->chunk_size; y++) {
             for(int z = 0; z < this->chunk_size; z++) {
                 glm::vec3 coords = glm::vec3(this->chunk_size*cx+x, this->chunk_size*cy+y, this->chunk_size*cz+z);
 
-                double value = perlin.GetValue(coords.x*scale, coords.y*scale, coords.z*scale);
-                if(value < 0.0) {
-                    toAdd.setVoxel(x, y, z, 1);
-                }
+                toAdd.setVoxel(x, y, z, this->gen->blockAt(coords));
             }
         }
     }
@@ -102,6 +101,26 @@ void World::setChunk(glm::ivec3 at, VoxelChunk chunk) {
     }
 }
 
+
+
+void World::setBlock(glm::ivec3 at, int id) {
+    glm::ivec3 chunkPos = at / glm::ivec3(this->chunk_size);
+
+
+}
+
+void World::setGenerator(BaseGenerator &gen) {
+    this->gen = &gen;
+}
+
 std::vector<VoxelChunk> World::getChunks() {
     return this->chunks;
+}
+
+unsigned int World::getRenderBuffer() {
+    return this->render_buf;
+}
+
+unsigned int World::getShadowBuffer() {
+    return this->shadow_buf;
 }

@@ -51,7 +51,7 @@ class VoxelChunk {
          * @param z 
          * @param id 
          */
-        void setVoxel(int x, int y, int z, int id);
+        void setVoxel(int x, int y, int z, std::string id);
         
         std::vector<Model> getModels();
 
@@ -83,7 +83,7 @@ class VoxelChunk {
         // std::vector<glm::vec3> corners;
 
         VoxelPalette * palette;
-        std::vector<int> data;
+        std::vector<std::string> data;
         // blocks are visible if any of the 8 blocks around them are transparent or empty
         std::vector<bool> visible;
         unsigned int VAO, VBO, EBO;
